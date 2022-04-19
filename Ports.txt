@@ -1,0 +1,7 @@
+IdentityServer-- "http://localhost:5001"
+CatalogApi-- "http://localhost:5011"
+PhotoStock-- "http://localhost:5012"
+BasketApi-- "http://localhost:5013"
+DiscountApi-- "http://localhost:5014"
+OrderApi-- "http://localhost:5015"
+Getway-- "http://localhost:5000"
