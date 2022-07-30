@@ -98,8 +98,7 @@
             "UpstreamHttpMethod": [ "Get", "Post", "Delete", "Put" ],
             "UpstreamShema": "http",
             "AuthenticationOptions": {
-                "AuthenticationProviderKey": "GetwayAuthenticationShema",
-                "AllowedScopes": [ "fake_payment_fullpermission" ]
+                "AuthenticationProviderKey": "GetwayAuthenticationShema"
             }
         }
     ],

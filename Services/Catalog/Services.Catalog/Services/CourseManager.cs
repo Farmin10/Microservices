@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MassTransit;
 using MongoDB.Driver;
 using Services.Catalog.Dtos;
 using Services.Catalog.Models;
 using Services.Catalog.Settings;
 using Shared.Dtos;
+using Shared.Messages;
 
 namespace Services.Catalog.Services
 {
@@ -16,8 +18,9 @@ namespace Services.Catalog.Services
         private readonly IMongoCollection<Course> _courseCollection;
         private readonly IMongoCollection<Category> _categoryCollection;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public CourseManager(IMapper mapper, IDatabaseSettings databaseSettings)
+        public CourseManager(IMapper mapper, IDatabaseSettings databaseSettings, IPublishEndpoint publishEndpoint)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
@@ -25,6 +28,7 @@ namespace Services.Catalog.Services
             _courseCollection = database.GetCollection<Course>(databaseSettings.CourseCollectionName);
             _categoryCollection = database.GetCollection<Category>(databaseSettings.CategoryCollectionName);
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<ResponseDto<List<CourseDto>>> GetAllAsync()
@@ -89,6 +93,8 @@ namespace Services.Catalog.Services
             {
                 return ResponseDto<NoContent>.Fail("Course Not Found", 404);
             }
+            await _publishEndpoint.Publish<CourseNameChangedEvent>(new CourseNameChangedEvent { CourseId=updateCourse.Id,UpdatedName=courseForUpdateDto.Name});
+            await _publishEndpoint.Publish<BasketNameChangedEvent>(new BasketNameChangedEvent { CourseId=updateCourse.Id,UpdatedName=courseForUpdateDto.Name,UserId=updateCourse.UserId});
             return ResponseDto<NoContent>.Success(204);
         }
 

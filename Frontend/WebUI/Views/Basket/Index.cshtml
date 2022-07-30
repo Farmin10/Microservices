@@ -1,0 +1,84 @@
+﻿@model BasketViewModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Cart</h5>
+                @if (Model != null && Model.BasketItems.Any())
+                {
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Course Name</th>
+                            <th>Course Price</th>
+                            <th>Actions</th>
+                        </tr>
+                        @foreach (var item in Model.BasketItems)
+                        {
+                            <tr>
+                                <td>@item.CourseName</td>
+                                <td>@item.GetCurrentPrice USD @(Model.HasDiscount?$"(%{Model.DiscountRate.Value} applied)":"")</td>
+                                <td>
+                                    <a class="btn btn-danger" asp-controller="Basket" asp-action="RemoveBasketItem" asp-route-courseId="@item.CourseId">Delete</a>
+                                </td>
+                            </tr>
+
+                        }
+                        @if (Model.HasDiscount)
+                        {
+                            <tr>
+                                <td>Discount Persentage</td>
+                                <th colspan="2">%@Model.DiscountRate.Value</th>
+                            </tr>
+                        }
+
+                        <tr>
+                            <td>@(Model.HasDiscount?"Discounted Price":"Total Price")</td>
+                            <th colspan="2">@Model.TotalPrice USD</th>
+                        </tr>
+
+
+
+
+                    </table>
+
+                    <form asp-action="ApplyDiscount" asp-controller="Basket">
+                        @if (Model.HasDiscount)
+                        {
+                            <div class="alert alert-success">
+                                "@Model.DiscountCode" discount code applied
+                                <a asp-controller="Basket" asp-action="CancelapplyDiscount">(Cancel)</a>
+                            </div>
+                        }
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="DiscountApplyInput.Code" class="form-control" />
+                            <button class="btn btn-outline-secondary" type="submit">Apply</button>
+                        </div>
+                        @if (TempData["discountStatus"] != null && (bool)TempData["discountStatus"] == false)
+                        {
+                            <div class="text-danger">Discount code unexpected</div>
+                        }
+                        @if (TempData["discountError"] != null)
+                        {
+                            <div class="text-danger">@TempData["discountError"]</div>
+                        }
+                    </form>
+                    <a class="btn btn-success" asp-action="Checkout" asp-controller="Order">Payment Infos</a>
+                    <a class="btn btn-warning" asp-action="Index" asp-controller="Home">Explore Courses </a>
+                }
+                else
+                {
+                    <div class="alert alert-info">Cart Empty</div>
+
+                }
+            </div>
+        </div>
+
+
+    </div>
+</div>
+

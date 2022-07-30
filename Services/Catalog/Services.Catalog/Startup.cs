@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +31,16 @@ namespace Services.Catalog
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddMassTransit(x => {
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host(Configuration["RabbitMQUrl"], "/", host => {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+                });
+            });
+            services.AddMassTransitHostedService();
             services.AddControllers(opt=>
             {
                 opt.Filters.Add(new AuthorizeFilter());

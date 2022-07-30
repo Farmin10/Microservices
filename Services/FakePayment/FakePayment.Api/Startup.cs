@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -29,7 +30,16 @@ namespace FakePayment.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddMassTransit(x => {
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host(Configuration["RabbitMQUrl"], "/", host => {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+                });
+            });
+            services.AddMassTransitHostedService();
             var requiredAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -38,7 +48,7 @@ namespace FakePayment.Api
                 options.Audience = "resource_fake_payment";
                 options.RequireHttpsMetadata = false;
             });
-
+           
             services.AddControllers(opt =>
             {
                 opt.Filters.Add(new AuthorizeFilter(requiredAuthorizePolicy));

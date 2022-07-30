@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Order.Application.Consumers;
 using Order.Infrastructure;
 using Shared.Services;
 
@@ -33,6 +35,28 @@ namespace Order.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+
+            services.AddMassTransit(x => {
+                x.AddConsumer<CreateOrderMessageCommandConsumer>();
+                x.AddConsumer<CourseNameChangedEventConsumer>();
+                x.UsingRabbitMq((context, config) =>
+                {
+                    
+                    config.Host(Configuration["RabbitMQUrl"], "/", host => {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+                    config.ReceiveEndpoint("create-order-service", e => {
+                        e.ConfigureConsumer<CreateOrderMessageCommandConsumer>(context);
+                    });
+                    config.ReceiveEndpoint("course-name-changed-event-order-service", e => {
+                        e.ConfigureConsumer<CourseNameChangedEventConsumer>(context);
+                    });
+
+                });
+            });
+            services.AddMassTransitHostedService();
 
             var requiredAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");

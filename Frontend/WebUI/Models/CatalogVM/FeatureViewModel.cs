@@ -8,7 +8,6 @@ namespace WebUI.Models.CatalogVM
 {
     public class FeatureViewModel
     {
-        [Required]
         public int Duration { get; set; }
     }
 }

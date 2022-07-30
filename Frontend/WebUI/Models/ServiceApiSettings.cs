@@ -11,6 +11,10 @@ namespace WebUI.Models
         public string  GetwayBaseUrl { get; set; }
         public string  PhotoStockUrl { get; set; }
         public ServiceApi Catalog { get; set; }
+        public ServiceApi Basket { get; set; }
+        public ServiceApi Discount { get; set; }
+        public ServiceApi FakePayment { get; set; }
+        public ServiceApi Order { get; set; }
         public ServiceApi PhotoStock { get; set; }
     }
 
