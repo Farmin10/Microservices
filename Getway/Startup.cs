@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Getway.DelegateHaldlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -27,7 +28,10 @@ namespace Getway
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddOcelot();
+
+            services.AddHttpClient<TokenExchangeDelegateHandler>();
+            services.AddOcelot().AddDelegatingHandler<TokenExchangeDelegateHandler>();
+
             services.AddAuthentication().AddJwtBearer("GetwayAuthenticationShema",options=> 
             {
                 options.Authority = Configuration["IdentityServerURL"];
